@@ -9,8 +9,9 @@
                 ExecutionId = message.ExecutionId,
                 ExecType = message.ExecType,
 
-                AvgPx = message.AvgPx,
+                LastPx = message.LastPx,
                 Qty = message.LastShares,
+                AvgPx = message.AvgPx,
                 CumQty = message.CumQty
             };
         }

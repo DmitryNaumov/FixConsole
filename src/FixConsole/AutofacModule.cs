@@ -11,6 +11,7 @@ namespace FixConsole
             builder.RegisterType<ExecutionReportMessageHandler>().AsImplementedInterfaces();
             builder.RegisterType<InMemoryOrderRepository>().SingleInstance().AsImplementedInterfaces().AsSelf();
             builder.RegisterType<MessageDispatcher>().SingleInstance().AsImplementedInterfaces().AsSelf();
+            builder.RegisterType<Application>().SingleInstance().AsSelf();
         }
     }
 }

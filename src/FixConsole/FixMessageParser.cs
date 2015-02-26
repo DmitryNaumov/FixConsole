@@ -8,12 +8,7 @@ namespace FixConsole
     {
         public FixMessage Parse(string message)
         {
-            int value;
-            var tags = message
-                .Split('\x1')
-                .Select(t => t.Split('='))
-                .Where(pair => Int32.TryParse(pair[0], out value))
-                .ToDictionary(pair => Int32.Parse(pair[0]), pair => pair[1]);
+            var tags = ExtractTags(message).ToDictionary(tuple => tuple.Item1, tuple => tuple.Item2);
 
             switch (tags[Fix42.StandardHeader.MsgType])
             {
@@ -23,6 +18,34 @@ namespace FixConsole
                     return ParseOrderCancelReject(tags);
                 default:
                     throw new NotImplementedException();
+            }
+        }
+
+        private IEnumerable<Tuple<int, string>> ExtractTags(string message)
+        {
+            int n = 0;
+            while (true)
+            {
+                int k = message.IndexOf('=', n);
+                int m = message.IndexOf('\x1', k);
+
+                var s = message.Substring(n, k - n);
+
+                int tag;
+                if (Int32.TryParse(s, out tag))
+                {
+
+                    
+                    if (m == -1)
+                    {
+                        yield return Tuple.Create(tag, message.Substring(k + 1));
+                        yield break;
+                    }
+
+                    yield return Tuple.Create(tag, message.Substring(k + 1, m - k - 1));
+                }
+
+                n = m + 1;
             }
         }
 
@@ -65,7 +88,7 @@ namespace FixConsole
 
         private FixMessage ParseOrderCancelReject(Dictionary<int, string> tags)
         {
-            return null;
+            return new OrderCancelRejectMessage();
         }
     }
 }

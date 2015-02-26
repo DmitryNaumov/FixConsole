@@ -10,24 +10,15 @@ namespace FixConsole
     {
         static void Main(string[] args)
         {
-            var container = BuildContainer();
-            var dispatcher = container.Resolve<MessageDispatcher>();
-
-            var stopwatch = Stopwatch.StartNew();
-
-            foreach (var message in new FixMessageSource().Read())
+            using (var container = BuildContainer())
             {
-                dispatcher.Dispatch(message);
-            }
+                container.Resolve<Application>().Run();
 
-            var elapsed = stopwatch.Elapsed;
-            Console.WriteLine(container.Resolve<InMemoryOrderRepository>().GetInvalidCount());
-            Console.WriteLine(elapsed);
-
-            if (Debugger.IsAttached)
-            {
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
+                if (Debugger.IsAttached)
+                {
+                    Console.WriteLine("Press any key to exit...");
+                    Console.ReadKey();
+                }
             }
         }
 
@@ -92,6 +83,14 @@ namespace FixConsole
     public abstract class FixMessage
     {
         public abstract Fix42.MsgType MsgType { get; }
+    }
+
+    public class OrderCancelRejectMessage : FixMessage
+    {
+        public override Fix42.MsgType MsgType
+        {
+            get { return Fix42.MsgType.CancelReject; }
+        }
     }
 
     public class ExecutionReportMessage : FixMessage
@@ -178,7 +177,9 @@ namespace FixConsole
 
         public enum MsgType
         {
-            ExecutionReport = 8
+            ExecutionReport = 8,
+
+            CancelReject = 12345 // ?!
         }
 
         public enum OrdStatus

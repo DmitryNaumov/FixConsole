@@ -5,7 +5,6 @@ namespace FixConsole
 {
     public class Order
     {
-        private const double Epsilon = Double.Epsilon;
         private Dictionary<string, Execution> _executions = new Dictionary<string, Execution>();
 
         public Order(string orderId)
@@ -19,18 +18,17 @@ namespace FixConsole
 
         public double CumQty { get; private set; }
 
+        public Price AvgPx { get; private set; }
+
         public void AddExecution(Execution execution)
         {
             switch (execution.ExecType)
             {
                 case Fix42.ExecType.PartialFill:
                 case Fix42.ExecType.Fill:
-                    if (_executions.Count == 0 && Math.Abs(execution.CumQty - execution.Qty) > Epsilon)
-                    {
-                    }
-
                     _executions.Add(execution.ExecutionId, execution);
                     CumQty += execution.Qty;
+                    AvgPx = execution.AvgPx;
                     break;
                 case Fix42.ExecType.Canceled:
                     break;
@@ -70,6 +68,11 @@ namespace FixConsole
             
             _executions.Add(execution.ExecutionId, execution);
             CumQty += execution.Qty;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}@{1}", CumQty, AvgPx);
         }
     }
 }
